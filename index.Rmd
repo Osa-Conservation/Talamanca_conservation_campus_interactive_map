@@ -1,7 +1,7 @@
 ---
-title: "Osa Conservation: Talamanca_conservation_campus_interactive_map"
+title: "Osa Conservation: Talamanca Conservation Campus"
 author:
-  - Osa Conservation Wildlife Team and Earthwatch
+  - Osa Conservation
 site: bookdown::test-bookdown
 output: bookdown::gitbook
 date: '`r paste("Updated on", Sys.Date())`'
@@ -42,22 +42,13 @@ dir.create(data_path)
 ```
 
 
-The following represents the data exploration for the data collected during the collaboration between Osa Conservation and Earthwatch for the project entitled:
-
-**A multi-taxa approach comparing the success of active tropical rainforest restoration with old-growth forest in Costa Rica.**
-
-Also known as:
-
-**The Piro Restoration Experiment**
-
-The centralized document for the protocols used in this experiment lives [here](https://docs.google.com/document/d/11z94NQX6Oz3Eoyfs-HaDUQQkKXT1yKlZnzrT5vFTTcM/edit?usp=sharing). Note, as this is a working document only OC staff currently have access. 
-
-## Study area and survey locations
+The following represents an interactive map of the developments at the Talamanca Conservation Campus. 
 
 ```{r, c02, include=F, message=F, warning=F, results="hide"}
 #Import the shapefiles for the maps
+
 dir.create("shapefiles")
-shp_folder <- drive_ls(path = as_id("1MhlqBbWVCaSoSiltC3SlGsEvltsVZvkC"), recursive=T)
+shp_folder <- drive_ls(path = as_id("1hAAzibtvpKzUUOSNuI6hFZQUYydsBBuN"), recursive=T)
 
 for(i in 1:nrow(shp_folder))
 {
@@ -68,85 +59,23 @@ for(i in 1:nrow(shp_folder))
   }
 }
 
-trails <- st_read("shapefiles/trails_osa.shp")
-trails<- st_zm(trails, drop = TRUE, what = "ZM")
-plots <- st_read("shapefiles/Restoration_experiment_original.shp")
-plots <- st_transform(plots, 4326)
-plots<- st_zm(plots, drop = TRUE, what = "ZM")
-# Update the column name
-colnames(plots)[colnames(plots)=="plotID"] <- "plot_id"
-
-plots_centroid <- st_centroid(plots)
-
-roads <- st_read("shapefiles/roads_osa.shp")
-
-# Import the plot locations
-dir.create("data")
-data_folder <- drive_ls(path = as_id("1dnLGAUTC0IQ9dSzC4l354whRrBXLNOM1"), recursive=F)
-# Subset to just the datafolders
-data_folder <- data_folder[substr(data_folder$name,1,4)=="Piro",]
-
-# Remove the shortcut folders and replace them with the real file 
-data_folder <- data_folder[!(data_folder$name %in% c("Piro_Restoration_Experiment_BATBOX_DATABASE", "Piro_Restoration_Experiment_BIRD_DATABASE")),]
-
-for(i in 1:nrow(data_folder))
-{
-  drive_download(file = as_id(data_folder$id[i]), path = paste0("data/", data_folder$name[i]), overwrite = TRUE)
-}
-
-# Also grab the bird and batbox databases - as they are shortcuts
-
-# Birds
-drive_download(file = as_id("19xnEVq_EH3xkZe-Up3iK6hXROm3LUu9rITm7FCI1-9A"), path = paste0("data/", "Piro_Restoration_Experiment_BIRD_DATABASE"), overwrite = TRUE)
-
-
-# Bats
-drive_download(file = as_id("1mI3RhnR0WiuaK3TFnnF46xugKDRttKR8xe-lNCpeeXA"), path = paste0("data/", "Piro_Restoration_Experiment_BATBOX_DATABASE"), overwrite = TRUE)
-
-# Read in the plot locations master list
-
-locs_db <- read_excel("data/Piro_Restoration_Experiment_PLOT_MASTERLIST.xlsx", sheet="survey_locations")  
-
+parcel <- st_read("shapefiles/shape pittier.shp")
+parcel<- st_zm(parcel, drop = TRUE, what = "ZM")
+parcel <- st_transform(parcel, 4326)
+parcel$
 ```
 
-The following map shows the locations of all the surveys included within this project to date. 
 
 ```{r map4, echo=F, class.source="Rmain"}
-
-# # First, set a single categorical variable of interest from station covariates for summary graphs. If you do not have an appropriate category use "project_id".
-# category <- "feature_type"
-# 
-# # We first convert this category to a factor with discrete levels
-# dep[,category] <- factor(dep[,category])
-# # then use the turbo() function to assign each level a color
-# col.cat <- turbo(length(levels(dep[,category])))
-# # then we apply it to the dataframe
-# dep$colours <- col.cat[dep[,category]]
 
 m <- leaflet() %>%
   addProviderTiles(providers$Esri.WorldImagery, group="Satellite") %>%  
   addTiles(group="Base") %>%     # Include a basemap option too
-  addPolylines(data = trails, group = "trails", color="brown") %>% 
-  addPolygons(data=plots, popup=plots$plot_id, group="plots",
+  addPolygons(data=parcel, group="property_boundary",
               weight=3) %>% 
-  addCircleMarkers(lng=locs_db$longitude, lat=locs_db$latitude,
-                   # Co lour the markers depending on the 'feature type'
-                   color="black",radius=3, stroke=F, fillOpacity=0.6,
-                   # Add a popup of the placename and feature_type together
-                   popup=paste(locs_db$plot_id, locs_db$original_treatment,
-                        "<br>Long:",locs_db$longitude,
-                        "<br>Lat:",locs_db$latitude),
-                   group="survey_locs") %>%
-  ## Add a legend explaining what is going on
-  # addLegend("topleft", colors = col.cat,  labels = levels(dep[,category]),
-  #                  title = category,
-  #                  labFormat = labelFormat(prefix = "$"),
-  #                  opacity = 1) %>%
-  # 
-  # add a layer control box to toggle between the layers
   addLayersControl(
-                    baseGroups = c("Base", "Satellite"),
-                    overlayGroups = c("plots","trails", "survey_locs"),
+                    baseGroups = c("Satellite","Base"),
+                    overlayGroups = c("property_boundary"),
                     options = layersControlOptions(collapsed = FALSE)
       ) %>%
   addFullscreenControl()
