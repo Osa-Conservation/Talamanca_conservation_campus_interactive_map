@@ -62,7 +62,7 @@ for(i in 1:nrow(shp_folder))
 parcel <- st_read("shapefiles/shape pittier.shp")
 parcel<- st_zm(parcel, drop = TRUE, what = "ZM")
 parcel <- st_transform(parcel, 4326)
-parcel$
+
 ```
 
 
