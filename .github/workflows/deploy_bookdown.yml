@@ -9,6 +9,8 @@ jobs:
   bookdown:
     name: Render-Book
     runs-on:   macos-latest # ubuntu-latest #  macos USES 10 TIMES THE MINUTES
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v2
       # More detail here, https://github.com/r-lib/actions
@@ -24,6 +26,8 @@ jobs:
         run: Rscript -e 'install.packages(c("rmarkdown","bookdown"))'
       - name: Install units
         run: Rscript -e "install.packages('units')"
+      - name: Install remotes
+        run: Rscript -e "install.packages('remotes')"        
       - name: Install leaflet
         run: Rscript -e "install.packages('leaflet')"
       - name: Install dplyr
@@ -46,8 +50,8 @@ jobs:
         run: Rscript -e "install.packages('readxl')"
       - name: Install foreach
         run: Rscript -e "install.packages('foreach')"
-      - name: Install leaflet.extras
-        run: Rscript -e "install.packages('leaflet.extras')"
+      - name: Install atlastools
+        run: Rscript -e "remotes::install_github('pratikunterwegs/atlastools')"
 
       - name: Render Book
         env: 
