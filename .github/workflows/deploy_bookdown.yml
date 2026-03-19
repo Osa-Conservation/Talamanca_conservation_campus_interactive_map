@@ -52,7 +52,8 @@ jobs:
         run: Rscript -e "install.packages('foreach')"
       - name: Install atlastools
         run: Rscript -e "remotes::install_github('pratikunterwegs/atlastools')"
-
+      - name: Install leaflet.extras
+        run: Rscript -e "remotes::install_github('bhaskarvk/leaflet.extras')"
       - name: Render Book
         env: 
           GOOGLE_AUTHENTICATION_CREDENTIALS: ${{ secrets.GOOGLE_AUTHENTICATION_CREDENTIALS }}
